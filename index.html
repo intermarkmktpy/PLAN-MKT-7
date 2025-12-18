@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Intermark - Tablero Profesional</title>
+    <title>Marketing Intermark - Tablero con Video</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +11,7 @@
         #canvas { position: relative; width: 100%; height: 100%; overflow: auto; background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 30px 30px; }
 
         .content-item { 
-            position: absolute; cursor: grab; width: 320px; min-height: 600px; 
+            position: absolute; cursor: grab; width: 320px; min-height: 620px; 
             background: white; border-radius: 0.75rem; padding: 1rem; 
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb;
             display: flex; flex-direction: column; justify-content: space-between; z-index: 10;
@@ -30,18 +30,19 @@
         .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
         .modal-content { margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; background: white; color: black; position: relative; }
         
+        .media-container { width: 100%; height: 150px; margin-top: 10px; background-color: #000; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; }
+        .media-container iframe, .media-container video, .media-container img { width: 100%; height: 100%; object-fit: cover; border: none; }
+
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 4000; }
         .btn-delete { position: absolute; top: 8px; right: 12px; color: #ef4444; cursor: pointer; font-size: 22px; font-weight: bold; }
-        .media-thumbnail { width: 100%; height: 80px; margin-top: 10px; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; }
-        .media-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
 
     <div id="canvas">
         <div class="p-8 pointer-events-none select-none">
-            <h1 class="text-3xl font-bold text-gray-800">Intermark: Tablero de Marketing</h1>
-            <p class="text-gray-500">Mueve libremente tus publicaciones y gestiona estados</p>
+            <h1 class="text-3xl font-bold text-gray-800">Intermark: Tablero Multimedia</h1>
+            <p class="text-gray-500">Reproduce contenido directamente en los paneles</p>
         </div>
         <div id="grid"></div>
     </div>
@@ -54,39 +55,25 @@
         <input type="hidden" id="edit_id">
         <div class="flex flex-col gap-3">
             <input type="text" id="p_prod" placeholder="Producto" class="p-2 border rounded">
-            <input type="text" id="p_tema" placeholder="Tema" class="p-2 border rounded">
-            <input type="text" id="p_fecha" placeholder="Día, Fecha (Ej: Lun, 15 Dic)" class="p-2 border rounded">
+            <input type="text" id="p_tema" placeholder="Tema (MAYÚSCULAS)" class="p-2 border rounded">
+            <input type="text" id="p_fecha" placeholder="Día, Fecha" class="p-2 border rounded">
             <select id="p_linea" class="p-2 border rounded">
                 <option value="isotelha">Isotelha</option>
                 <option value="panel-pir">Panel PIR</option>
                 <option value="angel-mir">Angel Mir</option>
                 <option value="feriado">Feriado/Evento</option>
             </select>
-            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 rounded font-bold uppercase mt-2">Guardar</button>
+            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 rounded font-bold mt-2">GUARDAR</button>
         </div>
     </div></div>
 
     <div id="linkModal" class="modal"><div class="modal-content">
         <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('linkModal')">&times;</span>
-        <h2 class="font-bold mb-4">Nuevo Medio</h2>
+        <h2 class="font-bold mb-4">Añadir Medio</h2>
         <input type="hidden" id="link_id">
-        <input type="text" id="l_name" placeholder="Nombre (ej: Video V1)" class="w-full p-2 border mb-2 rounded">
-        <input type="url" id="l_url" placeholder="URL de Drive o Web" class="w-full p-2 border mb-4 rounded">
-        <button onclick="saveLink()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">GUARDAR ENLACE</button>
-    </div></div>
-
-    <div id="viewerModal" class="modal"><div class="modal-content">
-        <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('viewerModal')">&times;</span>
-        <h2 class="font-bold mb-4 border-b pb-2">Archivos Adjuntos</h2>
-        <div id="viewerContent" class="flex flex-col gap-2 min-h-[100px]"></div>
-    </div></div>
-
-    <div id="commentModal" class="modal"><div class="modal-content">
-        <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('commentModal')">&times;</span>
-        <h2 class="font-bold mb-2">Chat de Publicación</h2>
-        <div id="commentList" class="h-48 overflow-y-auto mb-4 p-2 border rounded bg-gray-50 text-sm"></div>
-        <textarea id="new_comment" class="w-full p-2 border rounded h-20 text-sm" placeholder="Escribir mensaje..."></textarea>
-        <button onclick="saveComment()" class="w-full bg-indigo-600 text-white p-2 mt-2 rounded font-bold">ENVIAR</button>
+        <input type="text" id="l_name" placeholder="Nombre" class="w-full p-2 border mb-2 rounded">
+        <input type="url" id="l_url" placeholder="URL (YouTube o Link directo)" class="w-full p-2 border mb-4 rounded">
+        <button onclick="saveLink()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">AÑADIR</button>
     </div></div>
 
     <script type="module">
@@ -107,12 +94,12 @@
         const STATUS_COL = "content_status";
         let cloudData = {};
         let topZIndex = 100;
-
         let activeDragId = null;
         let shiftX, shiftY;
 
+        // --- ARRASTRE ---
         window.startDrag = (e, id) => {
-            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A', 'SPAN'].includes(e.target.tagName)) return;
+            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A', 'IFRAME', 'VIDEO'].includes(e.target.tagName)) return;
             activeDragId = id;
             const card = document.getElementById('card-' + id);
             topZIndex++;
@@ -120,7 +107,6 @@
             const rect = card.getBoundingClientRect();
             shiftX = e.clientX - rect.left;
             shiftY = e.clientY - rect.top;
-
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
         };
@@ -139,13 +125,16 @@
             activeDragId = null;
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mouseup', onMouseUp);
-
-            await setDoc(doc(db, STATUS_COL, id), { 
-                posX: parseInt(card.style.left), 
-                posY: parseInt(card.style.top) 
-            }, { merge: true });
+            await setDoc(doc(db, STATUS_COL, id), { posX: parseInt(card.style.left), posY: parseInt(card.style.top) }, { merge: true });
         };
 
+        // --- FUNCIONES ---
+        window.updateField = async (id, field, value) => { await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true }); };
+        window.deletePanel = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db, STATUS_COL, id)); };
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        window.openAddModal = () => { document.getElementById('edit_id').value = ''; document.getElementById('panelModal').style.display = 'block'; };
+        window.openLinkModal = (id) => { document.getElementById('link_id').value = id; document.getElementById('linkModal').style.display = 'block'; };
+        
         window.savePanelAction = async () => {
             const id = document.getElementById('edit_id').value || Date.now().toString();
             const f = document.getElementById('p_fecha').value;
@@ -161,28 +150,6 @@
             closeModal('panelModal');
         };
 
-        window.updateField = async (id, field, value) => { await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true }); };
-        window.deletePanel = async (id) => { if(confirm("¿Eliminar panel permanentemente?")) await deleteDoc(doc(db, STATUS_COL, id)); };
-
-        window.openAddModal = () => { 
-            document.getElementById('edit_id').value = ''; 
-            document.getElementById('p_prod').value = ''; 
-            document.getElementById('p_tema').value = ''; 
-            document.getElementById('p_fecha').value = ''; 
-            document.getElementById('panelModal').style.display = 'block'; 
-        };
-        
-        window.openEditModal = (id) => {
-            const item = cloudData[id];
-            document.getElementById('edit_id').value = id;
-            document.getElementById('p_prod').value = item.producto;
-            document.getElementById('p_tema').value = item.tema;
-            document.getElementById('p_fecha').value = `${item.dia}, ${item.fecha}`;
-            document.getElementById('p_linea').value = item.linea;
-            document.getElementById('panelModal').style.display = 'block';
-        };
-
-        window.openLinkModal = (id) => { document.getElementById('link_id').value = id; document.getElementById('linkModal').style.display = 'block'; };
         window.saveLink = async () => {
             const id = document.getElementById('link_id').value;
             const links = cloudData[id]?.links || [];
@@ -191,45 +158,43 @@
             closeModal('linkModal');
         };
 
-        window.openViewer = (id) => {
-            const container = document.getElementById('viewerContent');
-            const links = cloudData[id]?.links || [];
-            container.innerHTML = links.map(l => `
-                <div class="flex justify-between items-center p-2 border rounded bg-gray-50">
-                    <span class="text-sm font-bold">${l.name}</span>
-                    <a href="${l.url}" target="_blank" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">Abrir</a>
-                </div>`).join('') || "<p class='text-gray-400'>No hay archivos.</p>";
-            document.getElementById('viewerModal').style.display = 'block';
-        };
-
-        window.openCommentModal = (id) => {
-            document.getElementById('link_id').value = id;
-            document.getElementById('commentList').innerHTML = (cloudData[id]?.comments || []).map(c => `<div class="p-2 border-b">💬 ${c}</div>`).join('');
-            document.getElementById('commentModal').style.display = 'block';
-        };
-        window.saveComment = async () => {
-            const id = document.getElementById('link_id').value;
-            const current = cloudData[id]?.comments || [];
-            current.push(document.getElementById('new_comment').value);
-            await updateField(id, 'comments', current);
-            document.getElementById('new_comment').value = '';
-            closeModal('commentModal');
-        };
-
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-
         onSnapshot(collection(db, STATUS_COL), (snapshot) => {
             snapshot.forEach(doc => { cloudData[doc.id] = { id: doc.id, ...doc.data() }; });
             render();
         });
+
+        function getMediaHTML(url) {
+            if (!url) return '<div class="flex items-center justify-center h-full text-[10px] text-gray-500 uppercase">Sin Contenido</div>';
+            
+            // YouTube detection
+            const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/);
+            if (ytMatch) {
+                return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}?controls=0&rel=0&disablekb=1&modestbranding=1" allowfullscreen></iframe>`;
+            }
+
+            // Direct Video detection
+            if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
+                return `<video controls muted loop><source src="${url}" type="video/mp4"></video>`;
+            }
+
+            // Image detection
+            if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                return `<img src="${url}">`;
+            }
+
+            return `<div class="flex flex-col items-center justify-center h-full text-white bg-blue-900 p-2 text-center">
+                        <span class="text-[9px] font-bold">LINK EXTERNO</span>
+                        <a href="${url}" target="_blank" class="text-[8px] underline mt-1">Abrir en pestaña</a>
+                    </div>`;
+        }
 
         function render() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
             Object.values(cloudData).forEach(item => {
                 const links = item.links || [];
+                const firstMediaUrl = links[0]?.url;
                 const statusClass = item.status === 'aprobado' ? 'header-aprobado' : (item.status === 'desaprobado' ? 'header-desaprobado' : '');
-                const firstImg = links.find(l => l.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
                 const card = document.createElement('div');
                 card.id = 'card-' + item.id;
                 card.className = `content-item ${item.linea || 'isotelha'}`;
@@ -242,26 +207,30 @@
                     <div>
                         <div class="status-header ${statusClass}">
                             <div class="flex gap-2">
-                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black">APROBAR</button>
-                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black">RECHAZAR</button>
+                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black shadow-sm">OK</button>
+                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black shadow-sm">NO</button>
                             </div>
                         </div>
                         <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">${item.dia}, ${item.fecha}</p>
                         <h2 class="text-lg font-bold uppercase text-gray-900 leading-tight">${item.producto}</h2>
-                        <p class="text-[14px] font-bold text-gray-700 mt-2 uppercase italic">${item.tema || ''}</p>
-                        <div class="media-thumbnail">${firstImg ? `<img src="${firstImg.url}">` : '<span class="text-[9px] text-gray-400 uppercase">Multimedia</span>'}</div>
+                        <p class="text-[14px] font-bold text-gray-700 mt-1 uppercase italic">${item.tema || ''}</p>
+                        
+                        <div class="media-container">
+                            ${getMediaHTML(firstMediaUrl)}
+                        </div>
                     </div>
-                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-16 mt-3 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
+                    
+                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-12 mt-2 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
+                    
                     <div class="flex gap-1 mt-2">
                         <button onclick="openLinkModal('${item.id}')" class="flex-1 bg-blue-500 text-white text-[9px] py-1.5 rounded font-bold">+ LINK</button>
-                        <button onclick="openViewer('${item.id}')" class="flex-1 bg-gray-500 text-white text-[9px] py-1.5 rounded font-bold uppercase">Visor (${links.length})</button>
+                        <button onclick="alert('Historial: ' + cloudData['${item.id}'].links.map(l => l.name).join(', '))" class="flex-1 bg-gray-400 text-white text-[9px] py-1.5 rounded uppercase">Info (${links.length})</button>
                     </div>
+
                     <div class="mt-2 flex gap-1 border-t pt-3">
                         <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-400'}">PAUTA</button>
-                        <button onclick="updateField('${item.id}', 'pauta', 'no-pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-400'}">NO</button>
+                        <button onclick="updateField('${item.id}', 'no-pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-400'}">NO</button>
                     </div>
-                    <button onclick="openCommentModal('${item.id}')" class="w-full bg-indigo-500 text-white text-[10px] py-2 mt-2 rounded font-bold uppercase">Chat (${item.comments?.length || 0})</button>
-                    <button onclick="openEditModal('${item.id}')" class="w-full border border-blue-400 text-blue-500 text-[9px] py-1 mt-1 rounded font-bold uppercase">Editar</button>
                 `;
                 grid.appendChild(card);
             });
