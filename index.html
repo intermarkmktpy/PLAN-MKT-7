@@ -7,53 +7,51 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; overflow: hidden; height: 100vh; width: 100vw; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }
         
-        /* Contenedor infinito para mover paneles */
-        #canvas { position: relative; width: 100%; height: 100%; overflow: auto; }
+        /* Área de trabajo infinita */
+        #canvas { position: relative; width: 100%; height: 100%; overflow: auto; background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px; }
 
         .content-item { 
-            position: absolute; /* Vital para que sean flotantes */
+            position: absolute; 
             cursor: grab; 
-            width: 320px; 
-            min-height: 580px; 
+            width: 300px; 
+            min-height: 550px; 
             background: white; 
-            border-radius: 0.5rem; 
+            border-radius: 0.75rem; 
             padding: 1rem; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             border: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            user-select: none;
+            z-index: 10;
+            transition: box-shadow 0.2s;
         }
-        .content-item:active { cursor: grabbing; z-index: 1000 !important; }
+        .content-item:active { cursor: grabbing; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
 
         .status-header { padding: 6px; border-radius: 4px; margin-bottom: 10px; background-color: #f9fafb; }
         .header-aprobado { background-color: #008000 !important; }
         .header-desaprobado { background-color: #F80000 !important; }
         
-        .isotelha { border-left: 8px solid #fbbf24; }
-        .panel-pir { border-left: 8px solid #ef4444; }
-        .angel-mir { border-left: 8px solid #3b82f6; }
-        .feriado { border-left: 8px solid #38bdf8; }
+        .isotelha { border-left: 10px solid #fbbf24; }
+        .panel-pir { border-left: 10px solid #ef4444; }
+        .angel-mir { border-left: 10px solid #3b82f6; }
+        .feriado { border-left: 10px solid #38bdf8; }
 
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-content { margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; background: white; color: black; position: relative; }
-        .media-thumbnail { width: 100%; height: 70px; margin-top: 8px; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; }
-        .media-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+        .modal-content { margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; background: white; color: black; position: relative; }
         
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1500; }
-        .btn-delete { position: absolute; top: 5px; right: 5px; color: #ef4444; cursor: pointer; font-size: 18px; padding: 0 5px; }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #999; }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 4000; }
+        .btn-delete { position: absolute; top: 8px; right: 8px; color: #ef4444; cursor: pointer; font-size: 20px; z-index: 20; }
     </style>
 </head>
 <body>
 
     <div id="canvas">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold text-gray-800">Plan de Marketing: Calendario Interactivo</h1>
-            <p class="text-sm text-gray-500 italic">Arrastra los paneles para organizar tu semana</p>
+        <div class="p-8 pointer-events-none">
+            <h1 class="text-3xl font-bold text-gray-800">Intermark: Tablero Creativo</h1>
+            <p class="text-gray-500">Mueve las piezas para organizar tu estrategia de marketing</p>
         </div>
         <div id="grid"></div>
     </div>
@@ -61,38 +59,21 @@
     <div class="fab" onclick="openAddModal()">+</div>
 
     <div id="panelModal" class="modal"><div class="modal-content">
-        <span class="close-modal" onclick="closeModal('panelModal')">&times;</span>
-        <h2 id="modalTitle" class="font-bold mb-4 text-xl text-black">Nueva Publicación</h2>
+        <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('panelModal')">&times;</span>
+        <h2 id="modalTitle" class="font-bold mb-4 text-xl">Nueva Publicación</h2>
         <input type="hidden" id="edit_id">
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-4">
             <input type="text" id="p_prod" placeholder="Producto" class="p-2 border rounded">
-            <input type="text" id="p_tema" placeholder="Tema/Objetivo" class="p-2 border rounded">
-            <input type="text" id="p_fecha" placeholder="Día, Fecha" class="p-2 border rounded">
+            <input type="text" id="p_tema" placeholder="Tema principal" class="p-2 border rounded">
+            <input type="text" id="p_fecha" placeholder="Día, Fecha (Ej: Lun, 15 Dic)" class="p-2 border rounded">
             <select id="p_linea" class="p-2 border rounded">
-                <option value="isotelha">Isotelha (Amarillo)</option>
-                <option value="panel-pir">Panel PIR (Rojo)</option>
-                <option value="angel-mir">Angel Mir (Azul)</option>
-                <option value="feriado">Feriado (Celeste)</option>
+                <option value="isotelha">Isotelha</option>
+                <option value="panel-pir">Panel PIR</option>
+                <option value="angel-mir">Angel Mir</option>
+                <option value="feriado">Feriado/Evento</option>
             </select>
-            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 mt-4 rounded font-bold uppercase">Guardar</button>
+            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 rounded font-bold uppercase">Guardar Panel</button>
         </div>
-    </div></div>
-
-    <div id="linkModal" class="modal"><div class="modal-content">
-        <span class="close-modal" onclick="closeModal('linkModal')">&times;</span>
-        <h2 class="font-bold mb-4">Añadir Enlace</h2>
-        <input type="hidden" id="modal_id">
-        <input type="text" id="link_n" placeholder="Nombre" class="w-full p-2 border mb-2 rounded">
-        <input type="url" id="link_u" placeholder="URL" class="w-full p-2 border mb-4 rounded">
-        <button onclick="saveLink()" class="w-full bg-green-600 text-white p-3 rounded font-bold uppercase">Guardar</button>
-    </div></div>
-
-    <div id="commentModal" class="modal"><div class="modal-content">
-        <span class="close-modal" onclick="closeModal('commentModal')">&times;</span>
-        <h2 class="font-bold mb-2">Comentarios</h2>
-        <div id="commentList" class="h-40 overflow-y-auto mb-4 p-2 border rounded bg-gray-50 text-xs"></div>
-        <textarea id="new_comment" class="w-full p-2 border rounded h-16 text-sm" placeholder="Escribir..."></textarea>
-        <button onclick="saveComment()" class="w-full bg-indigo-600 text-white p-2 mt-2 rounded font-bold">ENVIAR</button>
     </div></div>
 
     <script type="module">
@@ -112,48 +93,62 @@
         const db = getFirestore(app);
         const STATUS_COL = "content_status";
         let cloudData = {};
+        let topZIndex = 100;
 
-        // --- LÓGICA DE ARRASTRE ---
-        let dragItem = null;
-        let offset = { x: 0, y: 0 };
+        // --- MANEJO DE ARRASTRE MEJORADO ---
+        let activeId = null;
+        let isDragging = false;
 
-        function onMouseDown(e, id) {
-            dragItem = document.getElementById('card-' + id);
-            const rect = dragItem.getBoundingClientRect();
-            offset.x = e.clientX - rect.left;
-            offset.y = e.clientY - rect.top;
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', () => onMouseUp(id));
-        }
+        window.startDrag = (e, id) => {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            
+            activeId = id;
+            isDragging = true;
+            const card = document.getElementById('card-' + id);
+            
+            // Traer al frente
+            topZIndex++;
+            card.style.zIndex = topZIndex;
 
-        function onMouseMove(e) {
-            if (!dragItem) return;
-            dragItem.style.left = (e.clientX - offset.x) + 'px';
-            dragItem.style.top = (e.clientY - offset.y) + 'px';
-        }
+            const rect = card.getBoundingClientRect();
+            const shiftX = e.clientX - rect.left;
+            const shiftY = e.clientY - rect.top;
 
-        async function onMouseUp(id) {
-            if (!dragItem) return;
-            const x = parseInt(dragItem.style.left);
-            const y = parseInt(dragItem.style.top);
-            await updateField(id, 'posX', x);
-            await updateField(id, 'posY', y);
-            dragItem = null;
-            window.removeEventListener('mousemove', onMouseMove);
-        }
+            function moveAt(clientX, clientY) {
+                card.style.left = (clientX - shiftX) + 'px';
+                card.style.top = (clientY - shiftY) + 'px';
+            }
 
-        // --- ACCIONES FIREBASE ---
+            function onMouseMove(event) {
+                if (isDragging) moveAt(event.clientX, event.clientY);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+
+            card.onmouseup = async function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                isDragging = false;
+                const finalX = parseInt(card.style.left);
+                const finalY = parseInt(card.style.top);
+                
+                // Guardar posición en Firebase
+                await setDoc(doc(db, STATUS_COL, id), { posX: finalX, posY: finalY }, { merge: true });
+                card.onmouseup = null;
+            };
+        };
+
+        // --- FUNCIONES DE PANEL ---
         window.savePanelAction = async () => {
             const id = document.getElementById('edit_id').value || Date.now().toString();
-            const fechaVal = document.getElementById('p_fecha').value;
+            const f = document.getElementById('p_fecha').value;
             await setDoc(doc(db, STATUS_COL, id), {
                 producto: document.getElementById('p_prod').value,
                 tema: document.getElementById('p_tema').value,
-                dia: fechaVal.split(',')[0] || '',
-                fecha: fechaVal.split(',')[1]?.trim() || '',
+                dia: f.split(',')[0] || '',
+                fecha: f.split(',')[1]?.trim() || '',
                 linea: document.getElementById('p_linea').value,
-                posX: cloudData[id]?.posX || 50,
-                posY: cloudData[id]?.posY || 150
+                posX: cloudData[id]?.posX || 100,
+                posY: cloudData[id]?.posY || 200
             }, { merge: true });
             closeModal('panelModal');
         };
@@ -162,98 +157,72 @@
             await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true });
         };
 
-        window.deletePanel = async (id) => { if(confirm("¿Eliminar panel?")) await deleteDoc(doc(db, STATUS_COL, id)); };
+        window.deletePanel = async (id) => {
+            if(confirm("¿Eliminar publicación permanentemente?")) await deleteDoc(doc(db, STATUS_COL, id));
+        };
 
-        // --- MODALES ---
-        window.openAddModal = () => { document.getElementById('edit_id').value = ''; document.getElementById('panelModal').style.display = 'block'; };
-        window.openEditModal = (id) => {
-            const item = cloudData[id];
-            document.getElementById('edit_id').value = id;
-            document.getElementById('p_prod').value = item.producto;
-            document.getElementById('p_tema').value = item.tema;
-            document.getElementById('p_fecha').value = `${item.dia}, ${item.fecha}`;
-            document.getElementById('p_linea').value = item.linea;
+        window.openAddModal = () => {
+            document.getElementById('edit_id').value = '';
+            document.getElementById('p_prod').value = '';
+            document.getElementById('p_tema').value = '';
+            document.getElementById('p_fecha').value = '';
             document.getElementById('panelModal').style.display = 'block';
         };
-        window.openLinkModal = (id) => { document.getElementById('modal_id').value = id; document.getElementById('linkModal').style.display = 'block'; };
-        window.saveLink = async () => {
-            const id = document.getElementById('modal_id').value;
-            const links = cloudData[id]?.links || [];
-            links.push({ name: document.getElementById('link_n').value, url: document.getElementById('link_u').value });
-            await updateField(id, 'links', links);
-            closeModal('linkModal');
-        };
-        window.openCommentModal = (id) => {
-            document.getElementById('modal_id').value = id;
-            document.getElementById('commentList').innerHTML = (cloudData[id]?.comments || []).map(c => `<div>💬 ${c}</div>`).join('');
-            document.getElementById('commentModal').style.display = 'block';
-        };
-        window.saveComment = async () => {
-            const id = document.getElementById('modal_id').value;
-            const current = cloudData[id]?.comments || [];
-            current.push(document.getElementById('new_comment').value);
-            await updateField(id, 'comments', current);
-            document.getElementById('new_comment').value = '';
-            closeModal('commentModal');
-        };
+
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
+        // --- RENDERIZADO ---
         onSnapshot(collection(db, STATUS_COL), (snapshot) => {
-            cloudData = {};
             snapshot.forEach(doc => { cloudData[doc.id] = { id: doc.id, ...doc.data() }; });
             render();
         });
 
         function render() {
-            const container = document.getElementById('grid');
-            container.innerHTML = '';
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
             Object.values(cloudData).forEach(item => {
-                const links = item.links || [];
                 const statusClass = item.status === 'aprobado' ? 'header-aprobado' : (item.status === 'desaprobado' ? 'header-desaprobado' : '');
-                const firstImg = links.find(l => l.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
-                
                 const card = document.createElement('div');
                 card.id = 'card-' + item.id;
-                card.className = `content-item ${item.linea}`;
-                card.style.left = (item.posX || 50) + 'px';
-                card.style.top = (item.posY || 150) + 'px';
+                card.className = `content-item ${item.linea || 'isotelha'}`;
                 
-                // Evento para arrastrar
-                card.onmousedown = (e) => {
-                    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
-                        onMouseDown(e, item.id);
-                    }
-                };
+                // Aplicar posición desde Firebase
+                card.style.left = (item.posX || 100) + 'px';
+                card.style.top = (item.posY || 200) + 'px';
+
+                card.onmousedown = (e) => startDrag(e, item.id);
 
                 card.innerHTML = `
-                    <div onclick="deletePanel('${item.id}')" class="btn-delete">×</div>
+                    <div onclick="deletePanel('${item.id}')" class="btn-delete">&times;</div>
                     <div>
                         <div class="status-header ${statusClass}">
-                            <div class="flex gap-1">
-                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[8px] py-1 rounded font-bold border">OK</button>
-                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[8px] py-1 rounded font-bold border">NO</button>
+                            <div class="flex gap-2">
+                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border shadow-sm">APROBAR</button>
+                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border shadow-sm">RECHAZAR</button>
                             </div>
                         </div>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase">${item.dia}, ${item.fecha}</p>
-                        <h2 class="text-sm font-bold uppercase text-black leading-tight">${item.producto}</h2>
-                        <p class="text-[11px] text-gray-600 mt-1">${item.tema}</p>
-                        <div class="media-thumbnail">
-                            ${firstImg ? `<img src="${firstImg.url}">` : '<span class="text-[9px] text-gray-400 uppercase">Multimedia</span>'}
-                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${item.dia}, ${item.fecha}</p>
+                        <h2 class="text-lg font-bold uppercase text-gray-900 leading-tight">${item.producto}</h2>
+                        <p class="text-sm text-gray-600 mt-1">${item.tema}</p>
                     </div>
-                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-12 mt-2 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
-                    <div class="flex gap-1 mt-2">
-                        <button onclick="openLinkModal('${item.id}')" class="flex-1 bg-blue-500 text-white text-[9px] py-1.5 rounded font-bold">+ LINK</button>
-                        <button onclick="alert('Links: ' + JSON.stringify(cloudData['${item.id}'].links))" class="flex-1 bg-gray-400 text-white text-[9px] py-1.5 rounded font-bold">VISOR</button>
+
+                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" 
+                        class="w-full text-xs p-2 border rounded h-20 mt-3 text-black focus:ring-2 focus:ring-indigo-200" 
+                        placeholder="Escribir Copy...">${item.copy || ''}</textarea>
+
+                    <div class="mt-3 flex gap-1 border-t pt-3">
+                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" 
+                            class="flex-1 py-1.5 rounded text-[10px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-500'}">PAUTA</button>
+                        <button onclick="updateField('${item.id}', 'pauta', 'no-pautar')" 
+                            class="flex-1 py-1.5 rounded text-[10px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-500'}">NO PAUTA</button>
                     </div>
-                    <div class="mt-2 flex gap-1 border-t pt-2">
-                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-1 rounded text-[8px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100'}">PAUTA</button>
-                        <button onclick="updateField('${item.id}', 'pauta', 'no-pautar')" class="flex-1 py-1 rounded text-[8px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100'}">NO</button>
+
+                    <div class="mt-2 text-center">
+                        <span class="text-[9px] text-gray-400 font-bold uppercase">Programado: ${item.fechaApp || 'Sin fecha'}</span>
                     </div>
-                    <button onclick="openCommentModal('${item.id}')" class="w-full bg-indigo-500 text-white text-[9px] py-1.5 mt-2 rounded font-bold uppercase">Chat (${item.comments?.length || 0})</button>
-                    <button onclick="openEditModal('${item.id}')" class="w-full border border-blue-400 text-blue-500 text-[8px] py-1 mt-1 rounded font-bold uppercase">Editar</button>
                 `;
-                container.appendChild(card);
+                grid.appendChild(card);
             });
         }
     </script>
