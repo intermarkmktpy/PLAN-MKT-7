@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Intermark - Tablero Total</title>
+    <title>Marketing Intermark - Tablero Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,8 +19,8 @@
         .content-item:active { cursor: grabbing; z-index: 1000 !important; }
 
         .status-header { padding: 6px; border-radius: 4px; margin-bottom: 10px; background-color: #f9fafb; }
-        .header-aprobado { background-color: #008000 !important; }
-        .header-desaprobado { background-color: #F80000 !important; }
+        .header-aprobado { background-color: #008000 !important; color: white !important; }
+        .header-desaprobado { background-color: #F80000 !important; color: white !important; }
         
         .isotelha { border-left: 10px solid #fbbf24; }
         .panel-pir { border-left: 10px solid #ef4444; }
@@ -31,8 +31,8 @@
         .modal-content { margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; background: white; color: black; position: relative; }
         
         .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 4000; }
-        .btn-delete { position: absolute; top: 8px; right: 8px; color: #ef4444; cursor: pointer; font-size: 20px; z-index: 20; }
-        .media-thumbnail { width: 100%; height: 80px; margin-top: 10px; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; }
+        .btn-delete { position: absolute; top: 8px; right: 12px; color: #ef4444; cursor: pointer; font-size: 22px; font-weight: bold; }
+        .media-thumbnail { width: 100%; height: 80px; margin-top: 10px; background-color: #e5e7eb; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; }
         .media-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
@@ -40,8 +40,8 @@
 
     <div id="canvas">
         <div class="p-8 pointer-events-none select-none">
-            <h1 class="text-3xl font-bold text-gray-800">Intermark: Plan de Marketing</h1>
-            <p class="text-gray-500">Organiza visualmente tus publicaciones y archivos</p>
+            <h1 class="text-3xl font-bold text-gray-800">Intermark: Tablero de Marketing</h1>
+            <p class="text-gray-500">Mueve libremente tus publicaciones y gestiona estados</p>
         </div>
         <div id="grid"></div>
     </div>
@@ -50,7 +50,7 @@
 
     <div id="panelModal" class="modal"><div class="modal-content">
         <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('panelModal')">&times;</span>
-        <h2 id="modalTitle" class="font-bold mb-4 text-xl">Configurar Publicación</h2>
+        <h2 id="modalTitle" class="font-bold mb-4 text-xl">Configuración de Panel</h2>
         <input type="hidden" id="edit_id">
         <div class="flex flex-col gap-3">
             <input type="text" id="p_prod" placeholder="Producto" class="p-2 border rounded">
@@ -62,24 +62,30 @@
                 <option value="angel-mir">Angel Mir</option>
                 <option value="feriado">Feriado/Evento</option>
             </select>
-            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 rounded font-bold uppercase mt-2">Guardar Cambios</button>
+            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3 rounded font-bold uppercase mt-2">Guardar</button>
         </div>
     </div></div>
 
     <div id="linkModal" class="modal"><div class="modal-content">
         <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('linkModal')">&times;</span>
-        <h2 class="font-bold mb-4">Añadir Medio</h2>
+        <h2 class="font-bold mb-4">Nuevo Medio</h2>
         <input type="hidden" id="link_id">
         <input type="text" id="l_name" placeholder="Nombre (ej: Video V1)" class="w-full p-2 border mb-2 rounded">
         <input type="url" id="l_url" placeholder="URL de Drive o Web" class="w-full p-2 border mb-4 rounded">
-        <button onclick="saveLink()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">AÑADIR ENLACE</button>
+        <button onclick="saveLink()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">GUARDAR ENLACE</button>
+    </div></div>
+
+    <div id="viewerModal" class="modal"><div class="modal-content">
+        <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('viewerModal')">&times;</span>
+        <h2 class="font-bold mb-4 border-b pb-2">Archivos Adjuntos</h2>
+        <div id="viewerContent" class="flex flex-col gap-2 min-h-[100px]"></div>
     </div></div>
 
     <div id="commentModal" class="modal"><div class="modal-content">
         <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('commentModal')">&times;</span>
-        <h2 class="font-bold mb-2">Historial de Chat</h2>
+        <h2 class="font-bold mb-2">Chat de Publicación</h2>
         <div id="commentList" class="h-48 overflow-y-auto mb-4 p-2 border rounded bg-gray-50 text-sm"></div>
-        <textarea id="new_comment" class="w-full p-2 border rounded h-20 text-sm" placeholder="Escribe un mensaje..."></textarea>
+        <textarea id="new_comment" class="w-full p-2 border rounded h-20 text-sm" placeholder="Escribir mensaje..."></textarea>
         <button onclick="saveComment()" class="w-full bg-indigo-600 text-white p-2 mt-2 rounded font-bold">ENVIAR</button>
     </div></div>
 
@@ -102,32 +108,46 @@
         let cloudData = {};
         let topZIndex = 100;
 
-        // --- ARRASTRE ---
+        // --- SOLUCIÓN ERROR ARRASTRE (DROP FIXED) ---
+        let activeDragId = null;
+        let shiftX, shiftY;
+
         window.startDrag = (e, id) => {
-            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A'].includes(e.target.tagName)) return;
+            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A', 'SPAN'].includes(e.target.tagName)) return;
+            activeDragId = id;
             const card = document.getElementById('card-' + id);
             topZIndex++;
             card.style.zIndex = topZIndex;
             const rect = card.getBoundingClientRect();
-            const shiftX = e.clientX - rect.left;
-            const shiftY = e.clientY - rect.top;
+            shiftX = e.clientX - rect.left;
+            shiftY = e.clientY - rect.top;
 
-            function moveAt(clientX, clientY) {
-                card.style.left = (clientX - shiftX) + 'px';
-                card.style.top = (clientY - shiftY) + 'px';
-            }
-
-            const onMouseMove = (ev) => moveAt(ev.clientX, ev.clientY);
-            document.addEventListener('mousemove', onMouseMove);
-
-            document.onmouseup = async () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                await setDoc(doc(db, STATUS_COL, id), { posX: parseInt(card.style.left), posY: parseInt(card.style.top) }, { merge: true });
-                document.onmouseup = null;
-            };
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
         };
 
-        // --- FUNCIONES CORE ---
+        const onMouseMove = (e) => {
+            if (!activeDragId) return;
+            const card = document.getElementById('card-' + activeDragId);
+            card.style.left = (e.clientX - shiftX) + 'px';
+            card.style.top = (e.clientY - shiftY) + 'px';
+        };
+
+        const onMouseUp = async () => {
+            if (!activeDragId) return;
+            const card = document.getElementById('card-' + activeDragId);
+            const id = activeDragId;
+            activeDragId = null;
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+
+            await setDoc(doc(db, STATUS_COL, id), { 
+                posX: parseInt(card.style.left), 
+                posY: parseInt(card.style.top) 
+            }, { merge: true });
+        };
+
+        // --- FUNCIONES ---
         window.savePanelAction = async () => {
             const id = document.getElementById('edit_id').value || Date.now().toString();
             const f = document.getElementById('p_fecha').value;
@@ -144,9 +164,8 @@
         };
 
         window.updateField = async (id, field, value) => { await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true }); };
-        window.deletePanel = async (id) => { if(confirm("¿Eliminar publicación?")) await deleteDoc(doc(db, STATUS_COL, id)); };
+        window.deletePanel = async (id) => { if(confirm("¿Eliminar panel permanentemente?")) await deleteDoc(doc(db, STATUS_COL, id)); };
 
-        // --- MODALES DINÁMICOS ---
         window.openAddModal = () => { document.getElementById('edit_id').value = ''; document.getElementById('panelModal').style.display = 'block'; };
         window.openEditModal = (id) => {
             const item = cloudData[id];
@@ -167,6 +186,17 @@
             closeModal('linkModal');
         };
 
+        window.openViewer = (id) => {
+            const container = document.getElementById('viewerContent');
+            const links = cloudData[id]?.links || [];
+            container.innerHTML = links.map(l => `
+                <div class="flex justify-between items-center p-2 border rounded bg-gray-50">
+                    <span class="text-sm font-bold">${l.name}</span>
+                    <a href="${l.url}" target="_blank" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">Abrir</a>
+                </div>`).join('') || "<p class='text-gray-400'>No hay archivos.</p>";
+            document.getElementById('viewerModal').style.display = 'block';
+        };
+
         window.openCommentModal = (id) => {
             document.getElementById('link_id').value = id;
             document.getElementById('commentList').innerHTML = (cloudData[id]?.comments || []).map(c => `<div class="p-2 border-b">💬 ${c}</div>`).join('');
@@ -183,7 +213,6 @@
 
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
-        // --- RENDER ---
         onSnapshot(collection(db, STATUS_COL), (snapshot) => {
             snapshot.forEach(doc => { cloudData[doc.id] = { id: doc.id, ...doc.data() }; });
             render();
@@ -204,29 +233,29 @@
                 card.onmousedown = (e) => startDrag(e, item.id);
 
                 card.innerHTML = `
-                    <div onclick="deletePanel('${item.id}')" class="btn-delete">&times;</div>
+                    <span onclick="deletePanel('${item.id}')" class="btn-delete">&times;</span>
                     <div>
                         <div class="status-header ${statusClass}">
                             <div class="flex gap-2">
-                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border">OK</button>
-                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border">NO</button>
+                                <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black">APROBAR</button>
+                                <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-[9px] py-1 rounded font-bold border text-black">RECHAZAR</button>
                             </div>
                         </div>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase">${item.dia}, ${item.fecha}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">${item.dia}, ${item.fecha}</p>
                         <h2 class="text-lg font-bold uppercase text-gray-900 leading-tight">${item.producto}</h2>
                         <p class="text-xs text-gray-600 mt-1">${item.tema}</p>
-                        <div class="media-thumbnail">${firstImg ? `<img src="${firstImg.url}">` : '<span class="text-[9px] text-gray-400">MULTIMEDIA</span>'}</div>
+                        <div class="media-thumbnail">${firstImg ? `<img src="${firstImg.url}">` : '<span class="text-[9px] text-gray-400 uppercase">Multimedia</span>'}</div>
                     </div>
-                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-16 mt-3 text-black" placeholder="Escribir Copy...">${item.copy || ''}</textarea>
+                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-16 mt-3 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
                     <div class="flex gap-1 mt-2">
                         <button onclick="openLinkModal('${item.id}')" class="flex-1 bg-blue-500 text-white text-[9px] py-1.5 rounded font-bold">+ LINK</button>
-                        <button onclick="alert('ARCHIVOS:\\n' + cloudData['${item.id}'].links.map(l => l.name + ': ' + l.url).join('\\n'))" class="flex-1 bg-gray-500 text-white text-[9px] py-1.5 rounded font-bold uppercase">Visor (${links.length})</button>
+                        <button onclick="openViewer('${item.id}')" class="flex-1 bg-gray-500 text-white text-[9px] py-1.5 rounded font-bold uppercase">Visor (${links.length})</button>
                     </div>
                     <div class="mt-2 flex gap-1 border-t pt-3">
-                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100'}">PAUTA</button>
-                        <button onclick="updateField('${item.id}', 'pauta', 'no-pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100'}">NO</button>
+                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-400'}">PAUTA</button>
+                        <button onclick="updateField('${item.id}', 'pauta', 'no-pautar')" class="flex-1 py-1 rounded text-[9px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-400'}">NO</button>
                     </div>
-                    <button onclick="openCommentModal('${item.id}')" class="w-full bg-indigo-500 text-white text-[9px] py-2 mt-2 rounded font-bold uppercase">Chat (${item.comments?.length || 0})</button>
+                    <button onclick="openCommentModal('${item.id}')" class="w-full bg-indigo-500 text-white text-[10px] py-2 mt-2 rounded font-bold uppercase">Chat (${item.comments?.length || 0})</button>
                     <button onclick="openEditModal('${item.id}')" class="w-full border border-blue-400 text-blue-500 text-[9px] py-1 mt-1 rounded font-bold uppercase">Editar</button>
                 `;
                 grid.appendChild(card);
