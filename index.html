@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Marketing Intermark - Omnicanal</title>
+    <title>Intermark - Tablero de Control de Marketing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; overflow-x: hidden; }
         
+        /* Contenedor infinito */
         #canvas { position: relative; width: 100%; min-height: 100vh; background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 30px 30px; }
 
-        /* Pantallas Grandes: Paneles flotantes */
+        /* Escritorio: Paneles flotantes */
         @media (min-width: 768px) {
             .content-item { position: absolute; width: 320px; cursor: grab; }
             #canvas { overflow: hidden; height: 100vh; }
         }
 
-        /* Pantallas Pequeñas: Paneles en lista */
+        /* Móvil: Paneles en lista */
         @media (max-width: 767px) {
             .content-item { position: relative !important; width: 100% !important; left: 0 !important; top: 0 !important; margin-bottom: 20px; cursor: default; }
-            #canvas { overflow-y: auto; height: auto; padding-bottom: 100px; }
-            .fab { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+            #canvas { overflow-y: auto; height: auto; padding-bottom: 120px; }
+            .fab { bottom: 20px; right: 20px; width: 55px; height: 55px; }
         }
 
         .content-item { 
             background: white; border-radius: 0.75rem; padding: 1rem; 
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb;
             display: flex; flex-direction: column; justify-content: space-between; z-index: 10;
-            min-height: 580px;
+            min-height: 600px;
         }
         .content-item:active { cursor: grabbing; z-index: 1000 !important; }
 
@@ -41,72 +42,154 @@
         .angel-mir { border-left: 10px solid #3b82f6; }
         .feriado { border-left: 10px solid #38bdf8; }
 
-        .media-container { width: 100%; height: 160px; margin-top: 10px; background-color: #000; border-radius: 4px; overflow: hidden; }
-        .media-container iframe, .media-container video, .media-container img { width: 100%; height: 100%; object-fit: cover; }
+        /* Previsualización multimedia en panel */
+        .media-preview-box { width: 100%; height: 120px; margin-top: 10px; background-color: #e5e7eb; border-radius: 6px; overflow: hidden; position: relative; cursor: pointer; border: 1px solid #d1d5db; }
+        .media-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .media-preview-box .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; opacity: 0.8; transition: opacity 0.2s; }
+        .media-preview-box:hover .play-overlay { opacity: 1; }
 
-        .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-content { margin: 10% auto; padding: 20px; border-radius: 12px; width: 95%; max-width: 450px; background: white; position: relative; }
+        /* Modales */
+        .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow-y: auto; }
+        .modal-content { margin: 5% auto; padding: 24px; border-radius: 12px; width: 95%; max-width: 500px; background: white; position: relative; }
         
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 4000; }
-        .btn-delete { position: absolute; top: 8px; right: 12px; color: #ef4444; cursor: pointer; font-size: 24px; font-weight: bold; }
+        /* Ventana flotante de video específica */
+        .video-modal-content { max-width: 800px; padding: 10px; background: #000; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; }
+        .video-container iframe, .video-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 4000; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.05); }
+        .btn-delete { position: absolute; top: 8px; right: 12px; color: #ef4444; cursor: pointer; font-size: 24px; font-weight: bold; z-index: 20; }
+        .close-modal { position: absolute; top: 12px; right: 15px; font-size: 28px; font-weight: bold; color: #999; cursor: pointer; z-index: 6000; }
+        .close-modal:hover { color: #333; }
+        .close-video-modal { color: white !important; top: -40px; right: 0; }
     </style>
 </head>
 <body>
 
     <div id="canvas">
-        <div class="p-6 md:p-8 select-none">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Intermark: Marketing Cloud</h1>
-            <p class="text-sm text-gray-500">Acceso adaptativo para todo el equipo</p>
+        <div class="p-6 md:p-10 select-none">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Intermark Marketing Cloud</h1>
+            <p class="text-sm text-gray-500 italic">Gestión de pautas y contenidos colaborativos</p>
         </div>
-        <div id="grid" class="px-4 md:px-0"></div>
+        <div id="grid"></div>
     </div>
 
-    <div class="fab" onclick="openAddModal()">+</div>
+    <!-- BOTÓN AÑADIR -->
+    <div class="fab" onclick="openPanelModal()">+</div>
 
+    <!-- MODAL: CREAR/EDITAR PANEL -->
     <div id="panelModal" class="modal"><div class="modal-content">
-        <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('panelModal')">&times;</span>
-        <h2 class="font-bold mb-4 text-xl">Configurar Panel</h2>
+        <span class="close-modal" onclick="closeModal('panelModal')">&times;</span>
+        <h2 id="modalTitle" class="font-bold mb-5 text-xl text-gray-800">Configurar Publicación</h2>
         <input type="hidden" id="edit_id">
-        <div class="flex flex-col gap-3">
-            <input type="text" id="p_prod" placeholder="Producto" class="p-3 border rounded text-lg">
-            <input type="text" id="p_tema" placeholder="TEMA EN MAYÚSCULAS" class="p-3 border rounded text-lg">
-            <input type="text" id="p_fecha" placeholder="Día, Fecha" class="p-3 border rounded text-lg">
-            <select id="p_linea" class="p-3 border rounded text-lg">
-                <option value="isotelha">Isotelha</option>
-                <option value="panel-pir">Panel PIR</option>
-                <option value="angel-mir">Angel Mir</option>
-                <option value="feriado">Feriado/Evento</option>
-            </select>
-            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-4 rounded font-bold uppercase mt-2 shadow-lg">GUARDAR</button>
+        <div class="flex flex-col gap-4">
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Producto</label>
+                <input type="text" id="p_prod" placeholder="Ej: Isotelha Colonial" class="w-full p-2.5 border rounded mt-1">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Tema de Publicación</label>
+                <input type="text" id="p_tema" placeholder="Ej: AISLAMIENTO TÉRMICO" class="w-full p-2.5 border rounded mt-1">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Fecha y Día</label>
+                <input type="text" id="p_fecha" placeholder="Ej: Lun, 15 Dic" class="w-full p-2.5 border rounded mt-1">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Línea Visual</label>
+                <select id="p_linea" class="w-full p-2.5 border rounded mt-1">
+                    <option value="isotelha">Isotelha (Amarillo)</option>
+                    <option value="panel-pir">Panel PIR (Rojo)</option>
+                    <option value="angel-mir">Angel Mir (Azul)</option>
+                    <option value="feriado">Feriado/Evento (Celeste)</option>
+                </select>
+            </div>
+            <button onclick="savePanelAction()" class="bg-indigo-600 text-white p-3.5 rounded-lg font-bold uppercase mt-4 shadow-lg active:scale-95 transition-all">Guardar Cambios</button>
+        </div>
+    </div></div>
+
+    <!-- MODAL: ENLACES -->
+    <div id="linkModal" class="modal"><div class="modal-content">
+        <span class="close-modal" onclick="closeModal('linkModal')">&times;</span>
+        <h2 class="font-bold mb-4 text-lg">Añadir Archivo o Link</h2>
+        <input type="hidden" id="link_target_id">
+        <input type="text" id="l_name" placeholder="Nombre (ej: Arte Final V1)" class="w-full p-2 border mb-3 rounded">
+        <input type="url" id="l_url" placeholder="URL (YouTube, Drive o Link directo)" class="w-full p-2 border mb-5 rounded text-black">
+        <button onclick="saveLink()" class="w-full bg-blue-600 text-white p-3 rounded font-bold uppercase">Añadir Enlace</button>
+    </div></div>
+
+    <!-- MODAL: COMENTARIOS -->
+    <div id="commentModal" class="modal"><div class="modal-content">
+        <span class="close-modal" onclick="closeModal('commentModal')">&times;</span>
+        <h2 class="font-bold mb-3 text-lg border-b pb-2">Historial de Comentarios</h2>
+        <div id="commentList" class="h-56 overflow-y-auto mb-4 p-3 border rounded bg-gray-50 text-sm flex flex-col gap-2"></div>
+        <textarea id="new_comment" class="w-full p-2.5 border rounded h-24 text-sm focus:ring-2 focus:ring-indigo-300 text-black" placeholder="Escribe un mensaje para el equipo..."></textarea>
+        <button onclick="saveComment()" class="w-full bg-indigo-600 text-white p-3 mt-3 rounded font-bold uppercase">Enviar Comentario</button>
+    </div></div>
+
+    <!-- MODAL: REPRODUCTOR FLOTANTE -->
+    <div id="videoModal" class="modal"><div class="modal-content video-modal-content">
+        <span class="close-modal close-video-modal" onclick="closeModal('videoModal')">&times;</span>
+        <div id="videoPlayerContainer" class="video-container">
+            <!-- El iframe o video se inyecta aquí -->
         </div>
     </div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDTg0CvxMsfdcO8L_XkDCwKzPIWsZ7HjXs",
-            authDomain: "marketing-intermark.firebaseapp.com",
-            projectId: "marketing-intermark",
-            storageBucket: "marketing-intermark.firebasestorage.app",
-            messagingSenderId: "887823380924",
-            appId: "1:887823380924:web:723b8f209bc6db22debbb9"
-        };
+        // CONFIGURACIÓN DINÁMICA SEGÚN EL ENTORNO
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'marketing-intermark';
+        const STATUS_COL = "content_status";
+        
+        // Path obligatorio para datos públicos en este entorno
+        const collectionPath = ['artifacts', appId, 'public', 'data', STATUS_COL];
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const STATUS_COL = "content_status";
-        let cloudData = {};
-        let topZIndex = 100;
+        const auth = getAuth(app);
 
-        // --- MANEJO DE DRAG (Solo se activa si el ancho es > 768px) ---
+        let cloudData = {};
+        let currentUser = null;
+        let topZIndex = 100;
         let activeDragId = null;
         let shiftX, shiftY;
 
+        // --- AUTENTICACIÓN ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Error Auth", e);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // Solo configuramos el listener si el usuario está autenticado
+                const q = collection(db, ...collectionPath);
+                onSnapshot(q, (snapshot) => {
+                    snapshot.forEach(doc => { cloudData[doc.id] = { id: doc.id, ...doc.data() }; });
+                    render();
+                }, (error) => console.error("Error Snapshot", error));
+            }
+        });
+
+        initAuth();
+
+        // --- MANEJO DE ARRASTRE ---
         window.startDrag = (e, id) => {
-            if (window.innerWidth < 768) return; // Deshabilitar drag en móviles
-            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A', 'IFRAME', 'VIDEO'].includes(e.target.tagName)) return;
+            if (window.innerWidth < 768) return; 
+            if (['BUTTON', 'TEXTAREA', 'INPUT', 'A', 'SELECT', 'SPAN'].includes(e.target.tagName)) return;
             
             activeDragId = id;
             const card = document.getElementById('card-' + id);
@@ -134,42 +217,137 @@
             activeDragId = null;
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mouseup', onMouseUp);
-            await setDoc(doc(db, STATUS_COL, id), { posX: parseInt(card.style.left), posY: parseInt(card.style.top) }, { merge: true });
+
+            if (!currentUser) return;
+            await setDoc(doc(db, ...collectionPath, id), { 
+                posX: parseInt(card.style.left), 
+                posY: parseInt(card.style.top) 
+            }, { merge: true });
         };
 
-        // --- FUNCIONES CORE ---
-        window.updateField = async (id, field, value) => { await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true }); };
-        window.deletePanel = async (id) => { if(confirm("¿Borrar definitivamente?")) await deleteDoc(doc(db, STATUS_COL, id)); };
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-        window.openAddModal = () => { document.getElementById('edit_id').value = ''; document.getElementById('panelModal').style.display = 'block'; };
+        // --- FUNCIONES DE PANEL ---
+        window.openPanelModal = () => {
+            document.getElementById('edit_id').value = '';
+            document.getElementById('modalTitle').innerText = 'Nueva Publicación';
+            document.getElementById('p_prod').value = '';
+            document.getElementById('p_tema').value = '';
+            document.getElementById('p_fecha').value = '';
+            document.getElementById('panelModal').style.display = 'block';
+        };
+
+        window.openEditModal = (id) => {
+            const item = cloudData[id];
+            document.getElementById('edit_id').value = id;
+            document.getElementById('modalTitle').innerText = 'Editar Contenido Base';
+            document.getElementById('p_prod').value = item.producto || '';
+            document.getElementById('p_tema').value = item.tema || '';
+            document.getElementById('p_fecha').value = (item.dia && item.fecha) ? `${item.dia}, ${item.fecha}` : '';
+            document.getElementById('p_linea').value = item.linea || 'isotelha';
+            document.getElementById('panelModal').style.display = 'block';
+        };
 
         window.savePanelAction = async () => {
+            if (!currentUser) return;
             const id = document.getElementById('edit_id').value || Date.now().toString();
             const f = document.getElementById('p_fecha').value;
-            await setDoc(doc(db, STATUS_COL, id), {
+            const data = {
                 producto: document.getElementById('p_prod').value,
                 tema: document.getElementById('p_tema').value,
-                dia: f.split(',')[0] || '',
-                fecha: f.split(',')[1]?.trim() || '',
+                dia: f.includes(',') ? f.split(',')[0].trim() : f,
+                fecha: f.includes(',') ? f.split(',')[1].trim() : '',
                 linea: document.getElementById('p_linea').value,
                 posX: cloudData[id]?.posX || 50,
                 posY: cloudData[id]?.posY || 180
-            }, { merge: true });
+            };
+            await setDoc(doc(db, ...collectionPath, id), data, { merge: true });
             closeModal('panelModal');
         };
 
-        onSnapshot(collection(db, STATUS_COL), (snapshot) => {
-            snapshot.forEach(doc => { cloudData[doc.id] = { id: doc.id, ...doc.data() }; });
-            render();
-        });
+        window.updateField = async (id, field, value) => {
+            if (!currentUser) return;
+            await setDoc(doc(db, ...collectionPath, String(id)), { [field]: value }, { merge: true });
+        };
 
-        function getMediaHTML(url) {
-            if (!url) return '<div class="flex items-center justify-center h-full text-gray-400 text-[10px]">SIN MULTIMEDIA</div>';
+        window.deletePanel = async (id) => {
+            if (!currentUser) return;
+            if(confirm("¿Eliminar publicación definitivamente?")) await deleteDoc(doc(db, ...collectionPath, id));
+        };
+
+        // --- MULTIMEDIA Y COMENTARIOS ---
+        window.openLinkModal = (id) => {
+            document.getElementById('link_target_id').value = id;
+            document.getElementById('l_name').value = '';
+            document.getElementById('l_url').value = '';
+            document.getElementById('linkModal').style.display = 'block';
+        };
+
+        window.saveLink = async () => {
+            if (!currentUser) return;
+            const id = document.getElementById('link_target_id').value;
+            const links = cloudData[id]?.links || [];
+            links.push({ name: document.getElementById('l_name').value, url: document.getElementById('l_url').value });
+            await updateField(id, 'links', links);
+            closeModal('linkModal');
+        };
+
+        window.openCommentModal = (id) => {
+            document.getElementById('edit_id').value = id;
+            const list = document.getElementById('commentList');
+            const comments = cloudData[id]?.comments || [];
+            list.innerHTML = comments.map(c => `<div class="bg-white p-2 rounded shadow-sm border text-black">💬 ${c}</div>`).join('') || '<p class="text-gray-400 text-center italic">No hay comentarios aún.</p>';
+            document.getElementById('commentModal').style.display = 'block';
+        };
+
+        window.saveComment = async () => {
+            if (!currentUser) return;
+            const id = document.getElementById('edit_id').value;
+            const text = document.getElementById('new_comment').value;
+            if(!text) return;
+            const comments = cloudData[id]?.comments || [];
+            comments.push(text);
+            await updateField(id, 'comments', comments);
+            document.getElementById('new_comment').value = '';
+            closeModal('commentModal');
+        };
+
+        window.openVideoPlayer = (url) => {
+            if(!url) return;
+            const container = document.getElementById('videoPlayerContainer');
             const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/);
-            if (ytMatch) return `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1" allowfullscreen></iframe>`;
-            if (url.match(/\.(mp4|webm|mov)$/i)) return `<video controls muted><source src="${url}"></video>`;
-            if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) return `<img src="${url}">`;
-            return `<div class="p-4 text-center bg-gray-100 h-full flex items-center justify-center text-[10px]"><a href="${url}" target="_blank" class="underline text-blue-600">VER LINK EXTERNO</a></div>`;
+            
+            if (ytMatch) {
+                const videoId = ytMatch[1].split('&')[0];
+                container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; fullscreen"></iframe>`;
+            } else if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
+                container.innerHTML = `<video controls autoplay class="w-full h-full"><source src="${url}"></video>`;
+            } else {
+                window.open(url, '_blank');
+                return;
+            }
+            document.getElementById('videoModal').style.display = 'block';
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
+            if(id === 'videoModal') document.getElementById('videoPlayerContainer').innerHTML = '';
+        };
+
+        function getPreviewMedia(item) {
+            const firstLink = item.links?.[0];
+            if(!firstLink) return `<div class="flex items-center justify-center h-full text-[10px] text-gray-400 uppercase">Sin Contenido</div>`;
+            
+            const url = firstLink.url;
+            const isVideo = url.match(/(youtube|youtu\.be|\.mp4|\.webm|\.mov)/i);
+            const isImg = url.match(/\.(jpeg|jpg|gif|png|webp)/i);
+
+            if (isImg) return `<img src="${url}" alt="preview">`;
+            if (isVideo) {
+                const videoIdMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+                const videoId = videoIdMatch ? videoIdMatch[1] : '0';
+                return `<div class="play-overlay">▶ REPRODUCIR</div><img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" onerror="this.src='https://placehold.co/400x300/000/fff?text=VIDEO'" alt="video-thumb">`;
+            }
+            
+            return `<div class="flex items-center justify-center h-full text-blue-600 font-bold text-xs p-2 text-center uppercase">📎 ${firstLink.name}</div>`;
         }
 
         function render() {
@@ -181,7 +359,6 @@
                 card.id = 'card-' + item.id;
                 card.className = `content-item ${item.linea || 'isotelha'}`;
                 
-                // Aplicar posición solo en escritorio
                 if(window.innerWidth >= 768) {
                     card.style.left = (item.posX || 50) + 'px';
                     card.style.top = (item.posY || 180) + 'px';
@@ -190,30 +367,46 @@
                 card.onmousedown = (e) => startDrag(e, item.id);
 
                 card.innerHTML = `
-                    <span onclick="deletePanel('${item.id}')" class="btn-delete">&times;</span>
+                    <span onclick="deletePanel('${item.id}')" class="btn-delete" title="Borrar">&times;</span>
                     <div>
                         <div class="status-header ${statusClass} flex gap-2">
-                            <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-black text-[10px] py-2 rounded font-bold shadow-sm">APROBAR</button>
-                            <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-black text-[10px] py-2 rounded font-bold shadow-sm">RECHAZAR</button>
+                            <button onclick="updateField('${item.id}', 'status', 'aprobado')" class="flex-1 bg-white text-black text-[10px] py-1.5 rounded font-bold shadow-sm active:bg-gray-100">OK</button>
+                            <button onclick="updateField('${item.id}', 'status', 'desaprobado')" class="flex-1 bg-white text-black text-[10px] py-1.5 rounded font-bold shadow-sm active:bg-gray-100">NO</button>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase mt-2">${item.dia}, ${item.fecha}</p>
-                        <h2 class="text-xl font-bold uppercase text-gray-900">${item.producto}</h2>
-                        <p class="text-[14px] font-bold text-gray-700 mt-2 uppercase italic leading-tight">${item.tema || ''}</p>
-                        <div class="media-container">${getMediaHTML(item.links?.[0]?.url)}</div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-2">${item.dia || '---'}, ${item.fecha || '---'}</p>
+                        <h2 class="text-xl font-bold uppercase text-gray-900 leading-tight">${item.producto || 'SIN NOMBRE'}</h2>
+                        <p class="text-[15px] font-bold text-gray-700 mt-2 uppercase italic leading-tight">${item.tema || ''}</p>
+                        
+                        <div class="media-preview-box" onclick="openVideoPlayer('${item.links?.[0]?.url}')">
+                            ${getPreviewMedia(item)}
+                        </div>
                     </div>
                     
-                    <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-sm p-3 border rounded h-20 mt-3 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
+                    <div class="mt-3">
+                        <label class="text-[9px] font-bold text-gray-400 uppercase">Texto de Publicación (Copy):</label>
+                        <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-xs p-2 border rounded h-16 mt-1 text-black bg-gray-50 focus:bg-white" placeholder="Escribir Copy...">${item.copy || ''}</textarea>
+                    </div>
                     
-                    <div class="mt-4 flex gap-1 border-t pt-4">
-                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-2 rounded text-[10px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'}">PAUTA</button>
-                        <button onclick="updateField('${item.id}', 'no-pautar')" class="flex-1 py-2 rounded text-[10px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-500'}">NO PAUTA</button>
+                    <div class="flex gap-1 mt-2">
+                        <button onclick="openLinkModal('${item.id}')" class="flex-1 bg-blue-500 text-white text-[9px] py-2 rounded font-bold shadow-sm">+ LINK</button>
+                        <button onclick="openVideoPlayer('${item.links?.[0]?.url}')" class="flex-1 bg-gray-500 text-white text-[9px] py-2 rounded font-bold uppercase shadow-sm">Visor (${item.links?.length || 0})</button>
+                    </div>
+
+                    <div class="mt-2 flex gap-1 border-t pt-3">
+                        <button onclick="updateField('${item.id}', 'pauta', 'pautar')" class="flex-1 py-1.5 rounded text-[9px] font-bold ${item.pauta === 'pautar' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-400'}">PAUTA</button>
+                        <button onclick="updateField('${item.id}', 'no-pautar')" class="flex-1 py-1.5 rounded text-[9px] font-bold ${item.pauta === 'no-pautar' ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-400'}">NO PAUTA</button>
+                    </div>
+
+                    <div class="flex flex-col gap-1 mt-3">
+                        <button onclick="openCommentModal('${item.id}')" class="w-full bg-indigo-500 text-white text-[9px] py-2 rounded font-bold uppercase shadow-sm">Comentarios (${item.comments?.length || 0})</button>
+                        <button onclick="openEditModal('${item.id}')" class="w-full border border-indigo-400 text-indigo-500 text-[9px] py-1.5 rounded font-bold uppercase">Editar Base</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
         
-        window.addEventListener('resize', render); // Re-renderizar al girar pantalla
+        window.addEventListener('resize', render);
     </script>
 </body>
 </html>
