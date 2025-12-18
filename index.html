@@ -83,7 +83,7 @@
 
     <div id="commentModal" class="modal"><div class="modal-content">
         <span class="absolute top-4 right-4 text-2xl cursor-pointer" onclick="closeModal('commentModal')">&times;</span>
-        <h2 class="font-bold mb-2">Comentarios</h2>
+        <h2 class="font-bold mb-2">Chat de Publicación</h2>
         <div id="commentList" class="h-48 overflow-y-auto mb-4 p-2 border rounded bg-gray-50 text-sm"></div>
         <textarea id="new_comment" class="w-full p-2 border rounded h-20 text-sm" placeholder="Escribir mensaje..."></textarea>
         <button onclick="saveComment()" class="w-full bg-indigo-600 text-white p-2 mt-2 rounded font-bold">ENVIAR</button>
@@ -108,7 +108,6 @@
         let cloudData = {};
         let topZIndex = 100;
 
-        // --- SOLUCIÓN ERROR ARRASTRE (DROP FIXED) ---
         let activeDragId = null;
         let shiftX, shiftY;
 
@@ -147,7 +146,6 @@
             }, { merge: true });
         };
 
-        // --- FUNCIONES ---
         window.savePanelAction = async () => {
             const id = document.getElementById('edit_id').value || Date.now().toString();
             const f = document.getElementById('p_fecha').value;
@@ -166,7 +164,14 @@
         window.updateField = async (id, field, value) => { await setDoc(doc(db, STATUS_COL, String(id)), { [field]: value }, { merge: true }); };
         window.deletePanel = async (id) => { if(confirm("¿Eliminar panel permanentemente?")) await deleteDoc(doc(db, STATUS_COL, id)); };
 
-        window.openAddModal = () => { document.getElementById('edit_id').value = ''; document.getElementById('panelModal').style.display = 'block'; };
+        window.openAddModal = () => { 
+            document.getElementById('edit_id').value = ''; 
+            document.getElementById('p_prod').value = ''; 
+            document.getElementById('p_tema').value = ''; 
+            document.getElementById('p_fecha').value = ''; 
+            document.getElementById('panelModal').style.display = 'block'; 
+        };
+        
         window.openEditModal = (id) => {
             const item = cloudData[id];
             document.getElementById('edit_id').value = id;
@@ -243,7 +248,7 @@
                         </div>
                         <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">${item.dia}, ${item.fecha}</p>
                         <h2 class="text-lg font-bold uppercase text-gray-900 leading-tight">${item.producto}</h2>
-                        <p class="text-xs text-gray-600 uppercase tracking-tighter">${item.tema}</p>
+                        <p class="text-[14px] font-bold text-gray-700 mt-2 uppercase italic">${item.tema || ''}</p>
                         <div class="media-thumbnail">${firstImg ? `<img src="${firstImg.url}">` : '<span class="text-[9px] text-gray-400 uppercase">Multimedia</span>'}</div>
                     </div>
                     <textarea onchange="updateField('${item.id}', 'copy', this.value)" class="w-full text-[10px] p-2 border rounded h-16 mt-3 text-black" placeholder="Copy...">${item.copy || ''}</textarea>
@@ -264,4 +269,3 @@
     </script>
 </body>
 </html>
-
